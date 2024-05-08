@@ -1,5 +1,6 @@
 const express=require("express");
 const app=express();
+const movieData=require("./Movie_Data/data.json");
 
 function Movie(title,posterPath,overview){
     this.title=title;
@@ -8,24 +9,25 @@ function Movie(title,posterPath,overview){
 }
 
 app.get("/",(req,res)=>{
-    const spidermanMovie=new Movie(
-        "Spider-Man: No Way Home","/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
-        "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous, forcing him to discover what it truly means to be Spider-Man."
-    );
-    res.json(spidermanMovie);
+    let movieArray=[];
+    movieData.map((item)=>{
+        let singleMovie=new Movie(item.title,item.posterPath,item.overview);
+        movieArray.push(singleMovie);
+    });
+    res.send(JSON.stringify(movieArray));
 });
 
 app.get("/favourite",(req,res)=>{
     res.send("<h1>Welcome to Favourite Page</h1>");
 });
 
-app.use((error500,req,res,next)=>{
-    console.error(error500.stack);
-    res.status(500).send("<h1>Sorry, Something went Wrong!</h1>");
-});
-
 app.use((req,res,next)=>{
     res.status(404).send("<h1>Page not found!</h1>");
+});
+
+app.use((err,req,res,next)=>{
+    console.error(err.stack);
+    res.status(500).send("<h1>Sorry, Something went Wrong!</h1>");
 });
 
 const port = 7777;
