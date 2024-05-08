@@ -24,8 +24,7 @@ app.use((error500,req,res,next)=>{
     res.status(500).send("<h1>Sorry, Something went Wrong!</h1>");
 });
 
-app.use((error404,req,res,next)=>{
-    console.error(error404.stack);
+app.use((req,res,next)=>{
     res.status(404).send("<h1>Page not found!</h1>");
 });
 
