@@ -11,8 +11,8 @@ This is a project that handles request from users and respond to it.
 
 ## Getting Started
 
-Just run the project and pray for it to work XD
+Just run the project
 
 ## Project Features
 
-Im shy to say that this is even a project so that i can mention it's features
+User can route between different pages, and in home page he/she will get adisplay for movies
