@@ -25,7 +25,9 @@ app.get("/favourite", (req, res) => {
 });
 
 app.get("/trending", trendingPageHandler);
-app.get(`/search`, searchPageHandler);
+app.get("/search", searchPageHandler);
+app.get("/now_playing",nowPlayingPageHandler);
+app.get("/upcoming",upcomingPageHandler);
 
 function trendingPageHandler(req, res) {
     const apiKey = process.env.API_Key;
@@ -87,7 +89,39 @@ function searchPageHandler(req, res) {
         });
 }
 
+function nowPlayingPageHandler(req,res){
+    const apiKey = process.env.API_Key;
+    let nowPlayingEndpoint=`https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=en-US`;
+    let arrayOfSpecificInformationMovies = [];
+    axios.get(nowPlayingEndpoint)
+        .then(Response => {
+                Response.data.results.map(specificInformationMovie => {
+                let newMovie = new Movie(specificInformationMovie.title, specificInformationMovie.poster_path, specificInformationMovie.overview);
+                arrayOfSpecificInformationMovies.push(newMovie);
+            });
+            res.send(arrayOfSpecificInformationMovies);
+        })
+        .catch(error => {
+            res.status(500).send(error);
+        })
+}
 
+function upcomingPageHandler(req,res){
+    const apiKey = process.env.API_Key;
+    let nowPlayingEndpoint=`https://api.themoviedb.org/3/movie/upcoming?api_key=${apiKey}&language=en-US`;
+    let arrayOfSpecificInformationMovies = [];
+    axios.get(nowPlayingEndpoint)
+        .then(Response => {
+                Response.data.results.map(specificInformationMovie => {
+                let newMovie = new Movie(specificInformationMovie.title, specificInformationMovie.poster_path, specificInformationMovie.overview);
+                arrayOfSpecificInformationMovies.push(newMovie);
+            });
+            res.send(arrayOfSpecificInformationMovies);
+        })
+        .catch(error => {
+            res.status(500).send(error);
+        })
+}
 
 app.use((req, res, next) => {
     res.status(404).send("<h1>Page not found!</h1>");
