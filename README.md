@@ -15,4 +15,4 @@ Just run the project
 
 ## Project Features
 
-User can route between different pages, and in home page he/she will get adisplay for movies, you can also look for trending movies and search for specific moving by typing the name of the movie you want
+User can route between different pages, and in home page he/she will get adisplay for movies, you can also look for trending movies and search for specific moving by typing the name of the movie you want, it can also make the user add a movie to database and get movies from database
