@@ -3,7 +3,12 @@ const app = express();
 const movieData = require("./Movie_Data/data.json");
 const axios = require("axios");
 require("dotenv").config();
+const pg = require("pg");
 const readline = require("readline");
+const { Server } = require("http");
+app.use(express.json());
+
+const client = new pg.Client('postgresql://localhost:5432/movies');
 
 function Movie(title, poster_path, overview) {
     this.title = title;
@@ -26,8 +31,34 @@ app.get("/favourite", (req, res) => {
 
 app.get("/trending", trendingPageHandler);
 app.get("/search", searchPageHandler);
-app.get("/now_playing",nowPlayingPageHandler);
-app.get("/upcoming",upcomingPageHandler);
+app.get("/now_playing", nowPlayingPageHandler);
+app.get("/upcoming", upcomingPageHandler);
+app.get("/get_movies", getMoviesHandler);
+app.post("/add_movie", addMovieHandler);
+
+function getMoviesHandler(req, res) {
+    const sql = "SELECT * FROM movies";
+    client.query(sql)
+        .then(data => {
+            res.send(data.rows);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        })
+}
+
+function addMovieHandler(req, res) {
+    const movieToAdd = req.body;
+    const sql = "INSERT INTO movies (title, summary) VALUES ($1, $2) RETURNING *";
+    const values = [movieToAdd.title, movieToAdd.summary];
+    client.query(sql, values)
+        .then(data => {
+            res.send("Your movie was added succesfully");
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
 
 function trendingPageHandler(req, res) {
     const apiKey = process.env.API_Key;
@@ -89,13 +120,13 @@ function searchPageHandler(req, res) {
         });
 }
 
-function nowPlayingPageHandler(req,res){
+function nowPlayingPageHandler(req, res) {
     const apiKey = process.env.API_Key;
-    let nowPlayingEndpoint=`https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=en-US`;
+    let nowPlayingEndpoint = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=en-US`;
     let arrayOfSpecificInformationMovies = [];
     axios.get(nowPlayingEndpoint)
         .then(Response => {
-                Response.data.results.map(specificInformationMovie => {
+            Response.data.results.map(specificInformationMovie => {
                 let newMovie = new Movie(specificInformationMovie.title, specificInformationMovie.poster_path, specificInformationMovie.overview);
                 arrayOfSpecificInformationMovies.push(newMovie);
             });
@@ -106,13 +137,13 @@ function nowPlayingPageHandler(req,res){
         })
 }
 
-function upcomingPageHandler(req,res){
+function upcomingPageHandler(req, res) {
     const apiKey = process.env.API_Key;
-    let nowPlayingEndpoint=`https://api.themoviedb.org/3/movie/upcoming?api_key=${apiKey}&language=en-US`;
+    let nowPlayingEndpoint = `https://api.themoviedb.org/3/movie/upcoming?api_key=${apiKey}&language=en-US`;
     let arrayOfSpecificInformationMovies = [];
     axios.get(nowPlayingEndpoint)
         .then(Response => {
-                Response.data.results.map(specificInformationMovie => {
+            Response.data.results.map(specificInformationMovie => {
                 let newMovie = new Movie(specificInformationMovie.title, specificInformationMovie.poster_path, specificInformationMovie.overview);
                 arrayOfSpecificInformationMovies.push(newMovie);
             });
@@ -133,6 +164,10 @@ app.use((err, req, res, next) => {
 });
 
 const port = 7777;
-app.listen(port, () => {
-    console.log("Server is running at port 7777");
-});
+
+client.connect()
+    .then(() => {
+        app.listen(port, () => {
+            console.log("Server is running at port 7777");
+        });
+    });
