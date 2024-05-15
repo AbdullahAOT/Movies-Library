@@ -35,6 +35,9 @@ app.get("/now_playing", nowPlayingPageHandler);
 app.get("/upcoming", upcomingPageHandler);
 app.get("/get_movies", getMoviesHandler);
 app.post("/add_movie", addMovieHandler);
+app.put("/update_movie/:id", updateMovieHandler);
+app.delete("/delete_movie/:id", deleteMovieHandler);
+app.get("/get_movie/:id", getMovieHandler);
 
 function getMoviesHandler(req, res) {
     const sql = "SELECT * FROM movies";
@@ -54,6 +57,43 @@ function addMovieHandler(req, res) {
     client.query(sql, values)
         .then(data => {
             res.send("Your movie was added succesfully");
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
+function updateMovieHandler(req, res) {
+    const movieId = req.params.id;
+    const sql = `UPDATE movies SET title = $1, summary=$2 WHERE id = ${movieId} RETURNING *`;
+    const values = [req.body.title,req.body.summary];
+    client.query(sql, values)
+        .then(data => {
+            res.status(200).send(data.rows);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
+function deleteMovieHandler(req, res) {
+    const movieId = req.params.id;
+    const sql = `DELETE FROM movies where id=${movieId}`;
+    client.query(sql)
+        .then(data => {
+            res.status(204).json({});
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
+function getMovieHandler(req, res) {
+    const movieId = req.params.id;
+    const sql = `SELECT * FROM movies WHERE id = ${movieId}`;
+    client.query(sql)
+        .then(data => {
+            res.status(200).send(data.rows);
         })
         .catch(err => {
             res.status(500).send(err);
