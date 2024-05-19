@@ -99,7 +99,7 @@ function getMovieHandler(req, res) {
             res.status(500).send(err);
         });
 }
-
+//ffff
 function trendingPageHandler(req, res) {
     const apiKey = process.env.API_Key;
     let trendingEndpoint = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=en-US`;
